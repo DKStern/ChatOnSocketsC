@@ -32,20 +32,27 @@ void str_overwrite_stdout() {
 volatile sig_atomic_t flag = 0;
 int sockfd = 0;
 char nickname[LENGTH_NAME] = {};
+bool KEY[256];
+
+void GetKEY()
+{
+    int i = 0;
+    while(i < 256)
+    {
+    if(GetAsyncKeyState(i)) KEY[i] = 1; else KEY[i] = 0;
+    i++;
+    }
+}
 
 void catch_ctrl_c_and_exit(int sig) {
     flag = 1;
 }
 
 void esc_handler() {
-    int button;
+    GetKEY()
     while (1) {
-        if ( kbhit() ) {
-            button = getch();
-            printf("Нажата кнопка: %d", button);
-        }
-        else {
-            printf("Кнопка не нажата!");
+        if ( Key[27] ) {
+            catch_ctrl_c_and_exit();
         }
     }    
 }

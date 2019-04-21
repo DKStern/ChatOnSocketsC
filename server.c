@@ -44,6 +44,17 @@ ClientList *newNode(int sockfd, char* ip) {
 int server_sockfd = 0, client_sockfd = 0;
 ClientList *root, *now;
 
+bool KEY[256];
+void GetKEY()
+{
+    int i = 0;
+    while(i < 256)
+    {
+    if(GetAsyncKeyState(i)) KEY[i] = 1; else KEY[i] = 0;
+    i++;
+    }
+}
+
 void catch_ctrl_c_and_exit(int sig) {
     ClientList *tmp;
     while (root != NULL) {
@@ -69,14 +80,10 @@ void send_to_all_clients(ClientList *np, char tmp_buffer[]) {
 }
 
 void esc_handler() {
-    int button;
+    GetKEY()
     while (1) {
-        if ( kbhit() ) {
-            button = getch();
-            printf("Нажата кнопка: %d", button);
-        }
-        else {
-            printf("Кнопка не нажата!");
+        if ( Key[27] ) {
+            catch_ctrl_c_and_exit();
         }
     }    
 }
