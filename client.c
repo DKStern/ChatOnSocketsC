@@ -32,29 +32,9 @@ void str_overwrite_stdout() {
 volatile sig_atomic_t flag = 0;
 int sockfd = 0;
 char nickname[LENGTH_NAME] = {};
-bool KEY[256];
-
-void GetKEY()
-{
-    int i = 0;
-    while(i < 256)
-    {
-    if(GetAsyncKeyState(i)) KEY[i] = 1; else KEY[i] = 0;
-    i++;
-    }
-}
 
 void catch_ctrl_c_and_exit(int sig) {
     flag = 1;
-}
-
-void esc_handler() {
-    GetKEY()
-    while (1) {
-        if ( Key[27] ) {
-            catch_ctrl_c_and_exit();
-        }
-    }    
 }
 
 void recv_msg_handler() {
@@ -112,14 +92,30 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    // Информация о сокете
-    struct sockaddr_in server_info, client_info;
-    int s_addrlen = sizeof(server_info);
-    int c_addrlen = sizeof(client_info);
-    memset(&server_info, 0, s_addrlen);
-    memset(&client_info, 0, c_addrlen);
-    server_info.sin_family = PF_INET;
-    server_info.sin_addr.s_addr = inet_addr("127.0.0.1");
+    // чтение из файла 
+    char * filename = "data.txt"; 
+    char cc[256]; 
+    FILE *fp; 
+    if((fp= fopen(filename, "r"))==NULL) { 
+        perror("Ошибка открытия файла!"); 
+        return 1; 
+    } 
+    // пока не дойдем до конца, считываем по 256 байт 
+    
+    while((fgets(cc, 256, fp))!=NULL) 
+    { 
+    printf("%s", cc); 
+    }     
+    fclose(fp); 
+
+    // Информация о сокете 
+    struct sockaddr_in server_info, client_info; 
+    int s_addrlen = sizeof(server_info); 
+    int c_addrlen = sizeof(client_info); 
+    memset(&server_info, 0, s_addrlen); 
+    memset(&client_info, 0, c_addrlen); 
+    server_info.sin_family = PF_INET; 
+    server_info.sin_addr.s_addr = inet_addr(cc); 
     server_info.sin_port = htons(8888);
 
     // Подключение к серверу
@@ -148,15 +144,9 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    pthread_t esc;
-    if (pthread_create(&esc, NULL, (void *)client_handler, (void *)c) != 0) {
-        perror("Ошибка создания потока для выхода!\n");
-        exit(EXIT_FAILURE);
-    }
-
     while (1) {
         if(flag) {
-            printf("\Завершение...\n");
+            printf("\nЗавершение...\n");
             break;
         }
     }
